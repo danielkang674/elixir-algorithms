@@ -13,11 +13,34 @@ defmodule SecretHandshake do
 
   10000 = Reverse the order of the operations in the secret handshake
   """
+  @sh %{1_000 => "jump", 100 => "close your eyes", 10 => "double blink", 1 => "wink"}
   @spec commands(code :: integer) :: list(String.t())
   def commands(code) do
-    a = Integer.to_charlist(code, 2)
+    binary = 
+      Integer.to_charlist(code, 2)
+      |> List.to_integer()
+    recur(binary, [])
+  end
+
+  def recur(binary, actions, index \\ 0)
+
+  def recur(binary, actions, index) when binary > 0 do
+    place = :math.pow(10, index) |> round
+    digit = rem(binary, 10) * place
+    binary = div(binary, 10)
     cond do
-      a == '1' -> ["wink"] 
+      digit < 1 ->
+        recur(binary, actions, index + 1)
+      digit == 10_000 ->
+        List.foldr(actions, [], &(&2 ++ [&1]))
+      digit > 10_000 ->
+        actions
+      true ->
+        recur(binary, actions ++ [@sh[digit]], index + 1)
     end
+  end
+
+  def recur(_binary, actions, _index) do
+    actions
   end
 end
